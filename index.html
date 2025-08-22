@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listado Estudiantes Violín</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      max-width: 95%;
+      margin: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e8f0fe;
+      color: #333;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    a {
+      background-color: #e8f0fe;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      background-color: #d2e3fc;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎻 Estudiantes de Violín</h1>
+
+<div class="table-container">
+  <table id="tabla-estudiantes">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-P5VqyKLOjt7R7szMCYXydc69nb30ALlz9BZXeFkG6JTZ9vLYnXftQ0o-Z2XekjWpqX26ciuxe34D/pub?output=csv";
+
+  fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const rows = data.trim().split('\n').map(row => row.split(','));
+      const thead = document.querySelector('thead');
+      const tbody = document.querySelector('tbody');
+
+      // Crear encabezados
+      const headerRow = document.createElement('tr');
+      rows[0].forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      // Crear filas de datos
+      for (let i = 1; i < rows.length; i++) {
+        const tr = document.createElement('tr');
+        rows[i].forEach((cell, colIndex) => {
+          const td = document.createElement('td');
+          const isLink = cell.startsWith("http://") || cell.startsWith("https://");
+
+          if (isLink) {
+            const a = document.createElement('a');
+            a.href = cell;
+            a.target = "_blank";
+
+            const header = rows[0][colIndex].trim().toLowerCase();
+            if (header.includes("apuntes")) {
+              a.textContent = "📚 Ver apuntes y tareas";
+            } else if (header.includes("canciones")) {
+              a.textContent = "🎵 Ver lista de canciones";
+            } else {
+              a.textContent = "🔗 Abrir enlace";
+            }
+
+            td.appendChild(a);
+          } else {
+            td.textContent = cell;
+          }
+
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      }
+    })
+    .catch(error => {
+      document.querySelector('.table-container').innerHTML = `<p>Error cargando la tabla. 😞</p>`;
+      console.error('Error cargando CSV:', error);
+    });
+</script>
+
+</body>
+</html>
